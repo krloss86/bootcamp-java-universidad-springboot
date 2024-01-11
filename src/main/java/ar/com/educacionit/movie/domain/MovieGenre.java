@@ -2,7 +2,6 @@ package ar.com.educacionit.movie.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,11 +19,19 @@ public class MovieGenre {
 	
 	@Column(name = "value", nullable = false)
 	private Long value;
-
-	@ManyToOne
-	@JoinColumn(name="movie_id")//es la fk
-	private Movie movie;
 	
+	public MovieGenre() {
+	}
+	
+	public MovieGenre(Long id) {
+		this.id = id;
+	}
+	
+	//bidireccional
+//    @ManyToOne
+//    @JoinColumn(name = "movie_id")
+//    private Movie movie;
+    
 	public Long getId() {
 		return id;
 	}
@@ -43,8 +50,7 @@ public class MovieGenre {
 
 	@Override
 	public String toString() {
-		return "MovieGenre [id=" + id + ", value=" + value + ", movie=" + movie + "]";
+		return "MovieGenre [id=" + id + ", value=" + value + "]";
 	}
-	
 	
 }
