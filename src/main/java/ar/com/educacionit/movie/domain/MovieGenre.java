@@ -18,7 +18,7 @@ public class MovieGenre {
 	private Long id;
 	
 	@Column(name = "value", nullable = false)
-	private Long value;
+	private String value;
 	
 	public MovieGenre() {
 	}
@@ -40,11 +40,11 @@ public class MovieGenre {
 		this.id = id;
 	}
 
-	public Long getValue() {
+	public String getValue() {
 		return value;
 	}
 
-	public void setValue(Long value) {
+	public void setValue(String value) {
 		this.value = value;
 	}
 
@@ -52,5 +52,13 @@ public class MovieGenre {
 	public String toString() {
 		return "MovieGenre [id=" + id + ", value=" + value + "]";
 	}
+
+//	public Movie getMovie() {
+//		return movie;
+//	}
+//
+//	public void setMovie(Movie movie) {
+//		this.movie = movie;
+//	}
 	
 }

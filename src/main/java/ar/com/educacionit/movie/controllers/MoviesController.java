@@ -6,10 +6,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ar.com.educacionit.movie.domain.Movie;
 import ar.com.educacionit.movie.domain.MovieGenre;
 import ar.com.educacionit.movie.dto.MovieRequestDTO;
+import ar.com.educacionit.movie.dto.MovieUpdateRequestDTO;
+import ar.com.educacionit.movie.exceptions.MyBadRequestValidException;
 import ar.com.educacionit.movie.services.MovieService;
 
 @RestController
@@ -30,15 +35,8 @@ public class MoviesController {
 	}
 	
 	@GetMapping
+	//si no tiene @PreAuthorize no valida!
 	public List<Movie> findAllMovies() {
-		/*List<Movie> pelis = repository.findAll();
-		for(Movie x : pelis) {
-			System.out.println("inicializando proxy");
-			Hibernate.initialize(x.getGenreIds());
-		}
-		return pelis;
-		*/
-		
 		return movieService.obtenerListado();
 	}
 	
@@ -100,7 +98,8 @@ public class MoviesController {
 	
 	
 	//eliminar una peli dado si id 
-	@DeleteMapping("/{id}") 
+	@DeleteMapping("/{id}")
+	@PreAuthorize(value = "hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<Void> eliminarPorId(
 			@PathVariable("id") Long id
 		) {
@@ -115,4 +114,28 @@ public class MoviesController {
 	}
 	
 	//actualizar una peli
+	@PutMapping("/{id}")//2
+	public ResponseEntity<Void> update(
+			@PathVariable(name = "id", required = true) Long id,
+			@Validated @RequestBody MovieUpdateRequestDTO request
+		) {
+		
+		if(!id.equals(request.getId()) ) {
+			throw new MyBadRequestValidException(
+				"los ids son distintos"
+			);
+		}
+		//idempotente (ver como hacer)
+		
+		//buscar y no existe!!!
+		//throw new MethodArgumentNotValidException(null, null) 
+		
+		//agregan la logica!!!
+		
+		return null;
+	}
+	
+	//agregar endpoint para recibir binario!
+	// blob / file system! url > obtener luego la imgen
+	
 }

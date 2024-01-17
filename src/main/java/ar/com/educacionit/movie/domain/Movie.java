@@ -12,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 @Entity
@@ -28,9 +30,15 @@ public class Movie {
 	@Column(name="backdrop_path", length = 255, nullable = true)
 	private String backdropPath;
 	
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinColumn(name = "movie_id")
-	//@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//	@OneToMany(fetch = FetchType.EAGER)
+//	@JoinColumn(name = "movie_id")
+//	@OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable( 
+		name = "movies_genres",  
+		joinColumns = @JoinColumn(name = "movie_id"), 
+		inverseJoinColumns = @JoinColumn(name = "genre_id") 
+	)	
 	private List<MovieGenre> genreIds;
 	
 	@Column(name = "originalLanguage") // NOT NULL
