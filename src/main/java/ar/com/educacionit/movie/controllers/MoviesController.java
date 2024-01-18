@@ -22,16 +22,33 @@ import ar.com.educacionit.movie.domain.MovieGenre;
 import ar.com.educacionit.movie.dto.MovieRequestDTO;
 import ar.com.educacionit.movie.dto.MovieUpdateRequestDTO;
 import ar.com.educacionit.movie.exceptions.MyBadRequestValidException;
+import ar.com.educacionit.movie.security.service.ExternalUserService;
+import ar.com.educacionit.movie.security.service.FeignExternalUserService;
 import ar.com.educacionit.movie.services.MovieService;
+import ar.com.educacionit.users.ReqResUser;
+import feign.Feign;
+import feign.Logger;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
+import feign.okhttp.OkHttpClient;
+import feign.slf4j.Slf4jLogger;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequestMapping("/movie")
 public class MoviesController {
 	
-	private final MovieService movieService;
 	
-	public MoviesController(MovieService movieService) {
+	private final MovieService movieService;
+	private final ExternalUserService externalUserServie;
+	
+	public MoviesController(MovieService movieService, ExternalUserService externalUserServie) {
 		this.movieService = movieService;
+		this.externalUserServie = externalUserServie;
 	}
 	
 	@GetMapping
@@ -42,11 +59,54 @@ public class MoviesController {
 	
 	//una pelicula dada si id 
 	@GetMapping("/{id}") 
+	@Operation(
+			summary = "Obtiene una pelicula dado su ID",
+			description = "consulta la tabla MOVIE",
+			tags = {"movie","get"}
+	)
+	@ApiResponses({
+			@ApiResponse(
+				responseCode = "200",
+				content = {
+					@Content(
+							schema = @Schema(implementation = Movie.class),
+							mediaType = "application/json"
+					)					
+				}
+			),
+			@ApiResponse(
+				responseCode = "401",
+				content = {@Content(schema = @Schema())}
+			),
+			@ApiResponse(
+					responseCode = "500",
+					content = {@Content(schema = @Schema())}
+				)
+		}
+	)
 	public ResponseEntity<Movie> buscarPorId(
 			@PathVariable("id") Long id
 		) {
 		
 		Movie movie = movieService.obtenerPorId(id);
+		
+		//a un servicio externo!!!
+		//http://algo.com.ar/api/v1/algo
+		//RestTemplate (OK)
+		//Feign(OK)
+		
+		//HttpClient (queda pendiente)
+		//ReqResUser user = externalUserServie.getUserById(1L);
+		
+		FeignExternalUserService feignService = Feign.builder()
+			.client(new OkHttpClient())
+			.encoder(new GsonEncoder())
+			.decoder(new GsonDecoder())
+			.target(FeignExternalUserService.class, "https://reqres.in/api/users/"+id);
+	
+		ReqResUser user = feignService.getUserById();
+		
+		System.out.println(user);
 		
 		if(movie == null) {
 			return ResponseEntity.notFound().build();			
